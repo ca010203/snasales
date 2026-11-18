@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sana · Trybe bookings (phone)</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/d3.min.js"></script>
+<script src="../assets/dash-shim.js"></script>
+</head><body>
+<div id="dash-root">
+<style>
+.mb-wrap{font-family:var(--font-anthropic-sans);color:var(--color-fg);font-size:var(--cds-font-size-body);display:flex;flex-direction:column;gap:var(--cds-gap-md);max-width:520px;margin:0 auto}
+.mb-title{font-weight:650;font-size:var(--cds-font-size-heading);letter-spacing:-.01em;margin:0 0 6px}
+.mb-lede{margin:0;line-height:1.45;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.mb-lede b{color:var(--color-fg);font-weight:600}
+.mb-period{display:flex;align-items:center;gap:var(--cds-gap-sm);color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.mb-period select,.mb-sel{flex:1;min-height:40px;font-size:16px}
+.mb-tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0;background:var(--color-bg)}
+.mb-tabs::-webkit-scrollbar{display:none}
+.mb-tab{flex:0 0 auto;font:inherit;font-size:14px;font-weight:550;background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:999px;padding:9px 14px;color:var(--color-fg-muted);cursor:pointer;min-height:40px}
+.mb-tab.mb-on{color:var(--color-panel);background:var(--color-fg);border-color:var(--color-fg)}
+.mb-panel{display:flex;flex-direction:column;gap:var(--cds-gap-md)}
+.mb-panel[hidden]{display:none}
+.mb-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mb-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:12px;padding:12px;min-width:0}
+.mb-cl{color:var(--color-fg-muted);font-size:12px;font-weight:550}
+.mb-cv{font-weight:650;font-size:22px;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin:4px 0 2px;white-space:nowrap}
+.mb-cs{color:var(--color-fg-muted);font-size:11.5px;line-height:1.35;font-variant-numeric:tabular-nums}
+.mb-h{font-size:15px;font-weight:650;margin:0 0 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.mb-sub{font-weight:400;color:var(--color-fg-muted);font-size:12px}
+.mb-note{margin:0 0 10px;color:var(--color-fg-muted);font-size:12px;line-height:1.4}
+.mb-ctl{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--color-fg-muted);font-size:12px}
+.mb-chart{min-height:220px}
+.mb-chart.mb-heat{min-height:300px}
+.mb-box{position:relative}
+.mb-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--color-fg-muted);margin-bottom:6px}
+.mb-key{display:inline-flex;align-items:center;gap:5px}
+.mb-key i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.mb-key i.mb-dash{height:0;border-top:2px dashed var(--cds-chart-reference);border-radius:0;width:12px}
+.mb-axis text{fill:var(--cds-text-secondary);font-size:10.5px;font-family:var(--font-anthropic-sans)}
+.mb-axis line{stroke:var(--cds-chart-grid)}
+.mb-lbl{fill:var(--cds-text-secondary);font-size:10px;font-variant-numeric:tabular-nums;font-family:var(--font-anthropic-sans)}
+.mb-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);box-shadow:var(--cds-shadow-popover);border-radius:8px;padding:8px 10px;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;z-index:3}
+.mb-tip[hidden]{display:none}
+.mb-tipsub{color:var(--cds-text-secondary)}
+.mb-tw{margin:0 -12px -12px;border-radius:0 0 12px 12px;overflow:hidden}
+.mb-tall{max-height:440px;overflow:auto;-webkit-overflow-scrolling:touch}
+.mb-table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;table-layout:auto}
+.mb-table th{text-align:right;font-weight:550;font-size:11.5px;color:var(--color-fg-muted);padding:7px 12px;border-top:1px solid var(--color-border-line);border-bottom:1px solid var(--color-border-line);position:sticky;top:0;background:var(--color-bg);z-index:1}
+.mb-table th.mb-l{text-align:left}
+.mb-table td{padding:9px 12px;border-bottom:1px solid var(--color-border-line)}
+.mb-table td.mb-n{text-align:right;white-space:nowrap}
+.mb-table td.mb-t{word-break:break-word}
+.mb-table tbody tr:last-child td{border-bottom:0}
+.mb-table td:first-child{font-weight:550}
+.mb-table tr.mb-total td{font-weight:650;background:var(--color-bg)}
+.mb-table tr.mb-picked td:first-child{box-shadow:inset 3px 0 0 var(--color-fg)}
+.mb-details{color:var(--color-fg-muted);font-size:12px;line-height:1.45}
+.mb-details ul{padding-left:18px}
+.mb-details li{margin-bottom:4px}
+[data-dash-source-state=refreshing]{opacity:.5}
+</style>
+<div class="mb-wrap">
+<header id="top">
+<h1 class="mb-title">Sana · Trybe bookings</h1>
+<p class="mb-lede">Since 18 Mar 2026: <b data-draw="num" data-k="All" data-f="net">—</b> net from <b data-draw="num" data-k="All" data-f="guests" data-fmt="int">—</b> guests. <b data-draw="num" data-k="All" data-f="same_day_pct" data-fmt="pct">—</b> book the day they visit; capacity runs at <b data-draw="num" data-k="All" data-f="occ_pct" data-fmt="pct">—</b>.</p>
+</header>
+<div class="mb-period" id="controls"><label for="mb-period">Period</label><select id="mb-period" class="dash-select" data-draw="period" aria-label="Period" data-source="monthly"></select></div>
+
+<nav class="mb-tabs" id="tabs" role="tablist"><button type="button" class="mb-tab mb-on" role="tab" aria-selected="true" data-tab="overview">Overview</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="hours">By hour</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="buying">When they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="mix">What they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="guests">Guests</button></nav>
+
+<section class="mb-panel" id="overview" data-panel="overview">
+<div class="mb-cards">
+<div class="mb-card" id="card-net"><div class="mb-cl">Net sales</div><div class="mb-cv" data-draw="num" data-f="net" data-fmt="usd0">—</div><div class="mb-cs"><span data-draw="num" data-f="pass_net" data-fmt="usd0">—</span> day passes</div></div>
+<div class="mb-card" id="card-guests"><div class="mb-cl">Guests</div><div class="mb-cv" data-draw="num" data-f="guests" data-fmt="int">—</div><div class="mb-cs"><span data-draw="num" data-f="guests_per_day" data-fmt="dec">—</span> a day open</div></div>
+<div class="mb-card" id="card-occ"><div class="mb-cl">Occupancy</div><div class="mb-cv" data-draw="num" data-f="occ_pct" data-fmt="pct">—</div><div class="mb-cs"><span data-draw="num" data-f="booked" data-fmt="int">—</span> of <span data-draw="num" data-f="capacity" data-fmt="int">—</span> spots</div></div>
+<div class="mb-card" id="card-lead"><div class="mb-cl">Median booking lead</div><div class="mb-cv" data-draw="num" data-f="med_lead_h" data-fmt="hrs">—</div><div class="mb-cs"><span data-draw="num" data-f="ahead_pct" data-fmt="pct">—</span> book 1+ day ahead</div></div>
+<div class="mb-card" id="card-online"><div class="mb-cl">Booked online</div><div class="mb-cv" data-draw="num" data-f="online_pct" data-fmt="pct">—</div><div class="mb-cs">rest at front desk</div></div>
+<div class="mb-card" id="card-aov"><div class="mb-cl">Average order</div><div class="mb-cv" data-draw="num" data-f="aov">—</div><div class="mb-cs"><span data-draw="num" data-f="orders" data-fmt="int">—</span> orders</div></div>
+</div>
+<div class="mb-card"><h3 class="mb-h" id="h-sales">Net sales by month</h3><p class="mb-note">Tap a bar to filter the whole page to that month.</p><div class="mb-chart" id="chart-sales" data-draw="chart_sales" data-source="monthly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-occm">Guests a day and occupancy</h3><div class="mb-chart" id="chart-occm" data-draw="chart_occm" data-source="monthly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-wsales">Net sales by week</h3><p class="mb-note">Weeks run Monday to Sunday. Tap a bar or row to filter the page to that week.</p><div class="mb-chart" id="chart-wsales" data-draw="chart_wsales" data-source="monthly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-wocc">Guests a day and occupancy by week</h3><div class="mb-chart" id="chart-wocc" data-draw="chart_wocc" data-source="monthly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-weeks">Week by week</h3><div class="mb-tw"><table class="mb-table" id="table-weekly" data-source="monthly" data-row-key="key" data-scope="weeks"><thead><tr><th class="mb-l" data-field="month" data-fmt="mon">Week of</th><th data-field="net" data-fmt="usdk">Net</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="occ_pct" data-fmt="pct0">Occ.</th><th data-field="ahead_pct" data-fmt="pct0">1+ day ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-months">Month by month</h3><div class="mb-tw"><table class="mb-table" id="table-monthly" data-source="monthly" data-row-key="key" data-scope="months"><thead><tr><th class="mb-l" data-field="month" data-fmt="mon">Month</th><th data-field="net" data-fmt="usdk">Net</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="occ_pct" data-fmt="pct0">Occ.</th><th data-field="ahead_pct" data-fmt="pct0">1+ day ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="mb-panel" id="hours" data-panel="hours" hidden>
+<div class="mb-card"><h3 class="mb-h" id="h-hourly">Guests on site by hour <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-ctl"><label for="mb-dow">Day</label><select id="mb-dow" class="dash-select mb-sel mb-dowsel" aria-label="Day of week"><option value="All">Every day</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option><option value="Sat">Saturday</option><option value="Sun">Sunday</option></select></div><p class="mb-note">Average guests in the facility each hour vs. what the slots allow (5 guests per 2.5-hour slot, a slot every 15 minutes, about 50 at once). Percent is the share booked.</p><div class="mb-chart" id="chart-hourly" data-draw="chart_hourly" data-source="hourly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-heat-occ">Occupancy by day and hour <span class="mb-sub" data-draw="periodname">—</span></h3><p class="mb-note">Share of capacity booked. Darker is fuller.</p><div class="mb-chart mb-heat" id="heat-occ" data-draw="heat_occ" data-source="hourly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-daily">Guests each day <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-chart" id="chart-daily" data-draw="chart_daily" data-source="daily">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-ahead">Already on the books</h3><p class="mb-note">Guests booked for upcoming days as of 18 Nov 2026. Most book within a day, so these fill in late.</p><div class="mb-chart" id="chart-ahead" data-draw="chart_ahead" data-source="ahead">—</div></div>
+</section>
+
+<section class="mb-panel" id="buying" data-panel="buying" hidden>
+<div class="mb-card"><h3 class="mb-h" id="h-lead">How far ahead guests book <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-ctl"><label for="mb-ch">Channel</label><select id="mb-ch" class="dash-select mb-sel mb-chsel" aria-label="Sales channel"><option value="All">All channels</option><option value="Online">Online</option><option value="Front desk">Front desk</option><option value="Reserve with Google">Reserve with Google</option></select></div><p class="mb-note">Order placed to session start. Walk-in means bought under 15 minutes before.</p><div class="mb-chart" id="chart-lead" data-draw="chart_lead" data-source="lead">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-heat-buy">When passes are bought <span class="mb-sub" data-draw="periodname">—</span></h3><p class="mb-note">Guests by the day and hour they bought, whatever day they visit.</p><div class="mb-chart mb-heat" id="heat-buy" data-draw="heat_buy" data-source="buy_heat">—</div></div>
+<div class="mb-card"><h3 class="mb-h">By channel <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw"><table class="mb-table" id="table-channel" data-source="channel" data-row-key="key" data-scope="period"><thead><tr><th class="mb-l" data-field="channel">Channel</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct0">Share</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">Group size <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw"><table class="mb-table" id="table-party" data-source="party" data-row-key="key" data-scope="period"><thead><tr><th class="mb-l" data-field="size">Per booking</th><th data-field="bookings" data-fmt="int">Bookings</th><th data-field="pct_bookings" data-fmt="pct0">Bookings</th><th data-field="pct_guests" data-fmt="pct0">Guests</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">Lead by visit day <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw"><table class="mb-table" id="table-leaddow" data-source="lead_dow" data-row-key="key" data-scope="period"><thead><tr><th class="mb-l" data-field="dow">Day</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th><th data-field="ahead_pct" data-fmt="pct0">1+ day ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="mb-panel" id="mix" data-panel="mix" hidden>
+<div class="mb-card"><h3 class="mb-h">Type of sale <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw"><table class="mb-table" id="table-type" data-source="sale_type" data-row-key="key" data-scope="period"><thead><tr><th class="mb-l" data-field="type">Type</th><th data-field="net" data-fmt="usd0">Net</th><th data-field="pct" data-fmt="pct0">Share</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">How passes were paid <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw"><table class="mb-table" id="table-paid" data-source="paid" data-row-key="key" data-scope="period"><thead><tr><th class="mb-l" data-field="payment">Payment</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct0">Share</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">Top items <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-tw mb-tall"><table class="mb-table" id="table-items" data-source="items" data-row-key="key" data-scope="period" data-sort="net"><thead><tr><th class="mb-l" data-field="item">Item</th><th data-field="qty" data-fmt="int">Qty</th><th data-field="net" data-fmt="usd0">Net</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">Promo codes and credit <span class="mb-sub" data-draw="periodname">—</span></h3><p class="mb-note">Discount off list price before tax. Gift card or pass credit was counted when the card or bundle sold.</p><div class="mb-tw mb-tall"><table class="mb-table" id="table-codes" data-source="codes" data-row-key="key" data-scope="period" data-sort="discount"><thead><tr><th class="mb-l" data-field="code">Code</th><th data-field="items" data-fmt="int">Items</th><th data-field="discount" data-fmt="usd0">Discount</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="mb-panel" id="guests" data-panel="guests" hidden>
+<div class="mb-cards">
+<div class="mb-card" id="card-named"><div class="mb-cl">Guests with an email</div><div class="mb-cv" data-draw="num" data-src="customers" data-f="guests_named" data-fmt="int">—</div><div class="mb-cs" data-draw="periodname">—</div></div>
+<div class="mb-card" id="card-repeat"><div class="mb-cl">Came more than once</div><div class="mb-cv" data-draw="num" data-src="customers" data-f="repeat_in_period_pct" data-fmt="pct">—</div><div class="mb-cs"><span data-draw="num" data-src="customers" data-f="visits_per_guest" data-fmt="dec">—</span> visits each</div></div>
+</div>
+<div class="mb-card"><h3 class="mb-h">New and returning</h3><p class="mb-note">Returning means their first Trybe visit was in an earlier month.</p><div class="mb-tw"><table class="mb-table" id="table-customers" data-source="customers" data-row-key="key" data-scope="months"><thead><tr><th class="mb-l" data-field="period" data-fmt="mon">Month</th><th data-field="guests_named" data-fmt="int">Guests</th><th data-field="new_guests" data-fmt="int">New</th><th data-field="returning_pct" data-fmt="pct0" data-blankzero="1">Returning</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h">How often guests come back</h3><div class="mb-tw"><table class="mb-table" id="table-freq" data-source="frequency" data-row-key="key"><thead><tr><th class="mb-l" data-field="band">Visits</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct0">Guests</th><th data-field="pct_visits" data-fmt="pct0">Visits</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<details class="mb-details" id="notes"><summary>About this data</summary>
+<ul>
+<li>Phone version of the Sana Trybe dashboard, with the same data: Trybe's Sold items and Sessions exports pulled 18 Nov 2026. Trybe starts 18 Mar 2026; November runs to the 17th. Weeks run Monday to Sunday from 28 Sep; the current week runs to yesterday.</li>
+<li>Net sales are after discounts, before tax. Passes paid with a gift card or multi-pass show $0 on the visit, since Trybe counts that money when the card or bundle sells.</li>
+<li>Occupancy is guests booked against slot capacity: 5 per 2.5-hour SANA Pass slot, a slot every 15 minutes. Test sessions and old Book4Time passes are left out.</li>
+<li>Booking lead is order time to session start. Front-desk passes rung in on arrival count as walk-ins. Guest and repeat counts use the booking email; no names or emails are stored.</li>
+</ul>
+</details>
+</div>
+</div>
+<footer class="site-foot">Data: Trybe Sold items and Sessions exports, pulled 18 November 2026. <a href="../">Open the desktop version</a></footer>
+<script src="../assets/iphone.js"></script>
+<script>dash.__start('../data/');</script>
+</body></html>

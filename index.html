@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sana · Trybe bookings</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="assets/d3.min.js"></script>
+<script src="assets/dash-shim.js"></script>
+</head><body>
+<div id="dash-root">
+<style>
+.sr-wrap{font-family:var(--font-anthropic-sans);color:var(--color-fg);font-size:var(--cds-font-size-body);display:flex;flex-direction:column;gap:var(--cds-gap-lg)}
+.sr-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--cds-gap-md)}
+.sr-title{font-family:var(--font-anthropic-sans);font-weight:650;font-size:var(--cds-font-size-title);letter-spacing:-.01em;margin:0 0 4px}
+.sr-lede{margin:0;max-width:78ch;line-height:1.5;color:var(--color-fg-muted)}
+.sr-lede b{color:var(--color-fg);font-weight:600}
+.sr-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm);color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.sr-tabs{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.sr-tab{font:inherit;font-size:var(--cds-font-size-caption);font-weight:550;background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 12px;color:var(--color-fg-muted);cursor:pointer}
+.sr-tab:hover{background:var(--color-border-line)}
+.sr-tab.sr-on{color:var(--color-fg);background:var(--color-panel);border-color:var(--color-border-line);box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.sr-panel{display:flex;flex-direction:column;gap:var(--cds-gap-lg)}
+.sr-panel[hidden]{display:none}
+.sr-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:var(--cds-gap-md)}
+.sr-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:var(--cds-gap-lg);align-items:start}
+.sr-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:12px;padding:var(--cds-pad-lg);box-shadow:0 1px 0 rgba(0,0,0,.05);min-width:0}
+.sr-card-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:var(--cds-gap-sm);font-size:var(--cds-font-size-body);font-weight:650;margin:0 0 var(--cds-gap-sm)}
+.sr-card-h .sr-sub{font-weight:400;color:var(--color-fg-muted)}
+.sr-card-h .sr-ctl{margin-left:auto;font-weight:400}
+.sr-note{margin:0 0 var(--cds-gap-md);color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);line-height:1.5;max-width:90ch}
+.sr-card-l{display:inline-block;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-weight:550}
+.sr-card-v{font-weight:650;font-size:var(--cds-font-size-title);letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin:var(--cds-gap-sm) 0 2px}
+.sr-card-s{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.sr-chart{min-height:280px}
+.sr-chart.sr-heat{min-height:220px}
+.sr-chartbox{position:relative}
+.sr-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs) var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-sm)}
+.sr-key{display:inline-flex;align-items:center;gap:6px}
+.sr-key i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.sr-key i.sr-dash{height:0;border-top:2px dashed var(--cds-chart-reference);border-radius:0;width:14px}
+.sr-axis text{fill:var(--cds-text-secondary);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans)}
+.sr-axis line{stroke:var(--cds-chart-grid)}
+.sr-barlabel{fill:var(--cds-text-secondary);font-size:11px;font-variant-numeric:tabular-nums;font-family:var(--font-anthropic-sans)}
+.sr-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);box-shadow:var(--cds-shadow-popover);border-radius:8px;padding:var(--cds-pad-sm);font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums;white-space:nowrap;z-index:2}
+.sr-tip[hidden]{display:none}
+.sr-tipsub{color:var(--cds-text-secondary);margin-top:2px}
+.sr-scroll{overflow-x:auto;margin:0 calc(-1 * var(--cds-pad-lg)) calc(-1 * var(--cds-pad-lg));border-radius:0 0 12px 12px}
+.sr-tall{max-height:520px;overflow:auto}
+.sr-table{border-collapse:collapse;width:100%;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.sr-table th{text-align:right;font-weight:550;color:var(--color-fg-muted);padding:8px 16px;border-top:1px solid var(--color-border-line);border-bottom:1px solid var(--color-border-line);white-space:nowrap;position:sticky;top:0;background:var(--color-bg);z-index:1}
+.sr-table th.sr-l{text-align:left}
+.sr-table td{padding:9px 16px;border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.sr-table tbody tr:last-child td{border-bottom:0}
+.sr-table tbody tr:hover td{background:var(--color-bg)}
+.sr-table td.sr-n{text-align:right}
+.sr-table td:first-child{font-weight:550}
+.sr-table tr.sr-total td{font-weight:650;background:var(--color-bg)}
+.sr-table tr.sr-picked td:first-child{box-shadow:inset 3px 0 0 var(--color-fg)}
+.sr-share{display:inline-flex;align-items:center;justify-content:flex-end;gap:10px}
+.sr-track{display:inline-block;width:72px;height:6px;border-radius:3px;background:var(--color-border-line);overflow:hidden}
+.sr-track i{display:block;height:100%;border-radius:3px}
+.sr-share span:last-child{min-width:44px;text-align:right}
+.sr-details{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);line-height:1.5;max-width:90ch}
+.sr-details li{margin-bottom:4px}
+[data-dash-source-state=refreshing]{opacity:.5}
+</style>
+<div class="sr-wrap">
+<header class="sr-head" id="top">
+<div>
+<h1 class="sr-title">Sana · Trybe bookings</h1>
+<p class="sr-lede">Since Trybe went live on 18 March 2026, net sales are <b data-draw="num" data-k="All" data-f="net">—</b> from <b data-draw="num" data-k="All" data-f="guests" data-fmt="int">—</b> day-pass guests. <b data-draw="num" data-k="All" data-f="same_day_pct" data-fmt="pct">—</b> of guests book on the day they visit, <b data-draw="num" data-k="All" data-f="walk_pct" data-fmt="pct">—</b> within three hours of arriving, and the median guest books <b data-draw="num" data-k="All" data-f="med_lead_h" data-fmt="hrs">—</b> ahead. Booked capacity runs at <b data-draw="num" data-k="All" data-f="occ_pct" data-fmt="pct">—</b>.</p>
+</div>
+<div class="sr-ctl" id="controls"><label for="sr-period">Period</label><select id="sr-period" class="dash-select" data-draw="period" aria-label="Period" data-source="monthly"></select></div>
+</header>
+
+<div class="sr-tabs" id="tabs" role="tablist"><button type="button" class="sr-tab sr-on" role="tab" aria-selected="true" data-tab="overview">Overview</button><button type="button" class="sr-tab" role="tab" aria-selected="false" data-tab="occupancy">Occupancy by hour</button><button type="button" class="sr-tab" role="tab" aria-selected="false" data-tab="buying">When people buy</button><button type="button" class="sr-tab" role="tab" aria-selected="false" data-tab="mix">What they buy</button><button type="button" class="sr-tab" role="tab" aria-selected="false" data-tab="guests">Guests</button></div>
+
+<section class="sr-panel" id="overview" data-panel="overview">
+<div class="sr-cards">
+<div class="sr-card" id="card-net"><div class="sr-card-l">Net sales</div><div class="sr-card-v" data-draw="num" data-f="net">—</div><div class="sr-card-s"><span data-draw="num" data-f="pass_net">—</span> from day passes</div></div>
+<div class="sr-card" id="card-guests"><div class="sr-card-l">Day-pass guests</div><div class="sr-card-v" data-draw="num" data-f="guests" data-fmt="int">—</div><div class="sr-card-s"><span data-draw="num" data-f="guests_per_day" data-fmt="dec">—</span> a day over <span data-draw="num" data-f="days" data-fmt="int">—</span> days open</div></div>
+<div class="sr-card" id="card-occ"><div class="sr-card-l">Occupancy</div><div class="sr-card-v" data-draw="num" data-f="occ_pct" data-fmt="pct">—</div><div class="sr-card-s"><span data-draw="num" data-f="booked" data-fmt="int">—</span> of <span data-draw="num" data-f="capacity" data-fmt="int">—</span> spots booked</div></div>
+<div class="sr-card" id="card-lead"><div class="sr-card-l">Median booking lead</div><div class="sr-card-v" data-draw="num" data-f="med_lead_h" data-fmt="hrs">—</div><div class="sr-card-s"><span data-draw="num" data-f="ahead_pct" data-fmt="pct">—</span> book a day or more ahead</div></div>
+<div class="sr-card" id="card-online"><div class="sr-card-l">Booked online</div><div class="sr-card-v" data-draw="num" data-f="online_pct" data-fmt="pct">—</div><div class="sr-card-s">of guests; the rest at the front desk</div></div>
+<div class="sr-card" id="card-aov"><div class="sr-card-l">Average order</div><div class="sr-card-v" data-draw="num" data-f="aov">—</div><div class="sr-card-s"><span data-draw="num" data-f="orders" data-fmt="int">—</span> orders placed</div></div>
+</div>
+<div class="sr-grid2">
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-sales">Net sales by month</h3><div class="sr-chart" id="chart-sales" data-draw="chart_sales" data-source="monthly">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-occm">Guests per day and occupancy by month</h3><div class="sr-chart" id="chart-occm" data-draw="chart_occm" data-source="monthly">—</div></div>
+</div>
+<div class="sr-grid2">
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-wsales">Net sales by week</h3><div class="sr-chart" id="chart-wsales" data-draw="chart_wsales" data-source="monthly">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-wocc">Guests per day and occupancy by week</h3><div class="sr-chart" id="chart-wocc" data-draw="chart_wocc" data-source="monthly">—</div></div>
+</div>
+<div class="sr-card"><h3 class="sr-card-h" id="weekly">Week by week</h3><p class="sr-note">Weeks run Monday to Sunday, from the week of 28 September. Click a week to filter every tab to it.</p><div class="sr-scroll"><table class="sr-table" id="table-weekly" data-source="monthly" data-row-key="key" data-scope="weeks"><thead><tr><th class="sr-l" data-field="month">Week</th><th data-field="net" data-fmt="usd0">Net sales</th><th data-field="pass_net" data-fmt="usd0">Day passes</th><th data-field="other_net" data-fmt="usd0">Everything else</th><th data-field="orders" data-fmt="int">Orders</th><th data-field="aov" data-fmt="usd">Avg order</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="guests_per_day" data-fmt="dec">Guests a day</th><th data-field="occ_pct" data-fmt="pct">Occupancy</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th><th data-field="same_day_pct" data-fmt="pct">Booked same day</th><th data-field="week_pct" data-fmt="pct">7+ days ahead</th><th data-field="online_pct" data-fmt="pct">Online</th><th data-field="promo_pct" data-fmt="pct">On a promo code</th><th data-field="promo_disc" data-fmt="usd0">Promo discounts</th><th data-field="credit_used" data-fmt="usd0">Gift card and pass credit used</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="monthly">Month by month</h3><p class="sr-note">Click a month or week in any chart or table, or pick one above, to filter every tab. Sales are counted by revenue date, guests and occupancy by visit date.</p><div class="sr-scroll"><table class="sr-table" id="table-monthly" data-source="monthly" data-row-key="key" data-scope="months"><thead><tr><th class="sr-l" data-field="month">Month</th><th data-field="net" data-fmt="usd0">Net sales</th><th data-field="pass_net" data-fmt="usd0">Day passes</th><th data-field="other_net" data-fmt="usd0">Everything else</th><th data-field="orders" data-fmt="int">Orders</th><th data-field="aov" data-fmt="usd">Avg order</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="guests_per_day" data-fmt="dec">Guests a day</th><th data-field="occ_pct" data-fmt="pct">Occupancy</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th><th data-field="same_day_pct" data-fmt="pct">Booked same day</th><th data-field="week_pct" data-fmt="pct">7+ days ahead</th><th data-field="online_pct" data-fmt="pct">Online</th><th data-field="promo_pct" data-fmt="pct">On a promo code</th><th data-field="promo_disc" data-fmt="usd0">Promo discounts</th><th data-field="credit_used" data-fmt="usd0">Gift card and pass credit used</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="sr-panel" id="occupancy" data-panel="occupancy" hidden>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-hourly">Guests on site by hour <span class="sr-sub" data-draw="periodname">—</span><span class="sr-ctl"><label for="sr-dow">Day</label><select id="sr-dow" class="dash-select sr-dowsel" aria-label="Day of week"><option value="All">Every day</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option><option value="Sat">Saturday</option><option value="Sun">Sunday</option></select></span></h3><p class="sr-note">Average number of guests in the facility during each clock hour, against what the booking slots allow. Each 2.5-hour SANA Pass slot takes 5 guests and slots start every 15 minutes, so about 50 people can be on site at once. The figure above each bar is the share of that capacity booked.</p><div class="sr-chart" id="chart-hourly" data-draw="chart_hourly" data-source="hourly">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-heat-occ">Occupancy by weekday and hour <span class="sr-sub" data-draw="periodname">—</span></h3><p class="sr-note">Share of capacity booked. Darker is fuller.</p><div class="sr-chart sr-heat" id="heat-occ" data-draw="heat_occ" data-source="hourly">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-daily">Guests each day <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-chart" id="chart-daily" data-draw="chart_daily" data-source="daily">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-ahead">Already on the books</h3><p class="sr-note">Guests booked for each upcoming day, as of 18 November 2026. Most guests book within a day of visiting, so these fill in as each date gets closer.</p><div class="sr-chart" id="chart-ahead" data-draw="chart_ahead" data-source="ahead">—</div></div>
+</section>
+
+<section class="sr-panel" id="buying" data-panel="buying" hidden>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-lead">How far ahead guests book <span class="sr-sub" data-draw="periodname">—</span><span class="sr-ctl"><label for="sr-ch">Channel</label><select id="sr-ch" class="dash-select sr-chsel" aria-label="Sales channel"><option value="All">All channels</option><option value="Online">Online</option><option value="Front desk">Front desk</option><option value="Reserve with Google">Reserve with Google</option></select></span></h3><p class="sr-note">Time between the order being placed and the start of the guest's session. A walk-in is a pass bought less than 15 minutes before the session starts.</p><div class="sr-chart" id="chart-lead" data-draw="chart_lead" data-source="lead">—</div></div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-heat-buy">When day passes are bought <span class="sr-sub" data-draw="periodname">—</span></h3><p class="sr-note">Guests by the weekday and hour their pass was purchased, whatever day they visit. Darker means more guests booked in that hour.</p><div class="sr-chart sr-heat" id="heat-buy" data-draw="heat_buy" data-source="buy_heat">—</div></div>
+<div class="sr-grid2">
+<div class="sr-card"><h3 class="sr-card-h">By sales channel <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-scroll"><table class="sr-table" id="table-channel" data-source="channel" data-row-key="key" data-scope="period"><thead><tr><th class="sr-l" data-field="channel">Channel</th><th data-field="bookings" data-fmt="int">Bookings</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct" data-bar="1">Share of guests</th><th data-field="net_per_guest" data-fmt="usd">Net per guest</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th><th data-field="ahead_pct" data-fmt="pct">1+ day ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="sr-card"><h3 class="sr-card-h">Group size <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-scroll"><table class="sr-table" id="table-party" data-source="party" data-row-key="key" data-scope="period"><thead><tr><th class="sr-l" data-field="size">Guests per booking</th><th data-field="bookings" data-fmt="int">Bookings</th><th data-field="pct_bookings" data-fmt="pct" data-bar="1">Share of bookings</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct_guests" data-fmt="pct">Share of guests</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</div>
+<div class="sr-card"><h3 class="sr-card-h">Booking lead by the day guests visit <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-scroll"><table class="sr-table" id="table-leaddow" data-source="lead_dow" data-row-key="key" data-scope="period"><thead><tr><th class="sr-l" data-field="dow">Visit day</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="med_lead_h" data-fmt="hrs">Median lead</th><th data-field="walk_pct" data-fmt="pct">Under 3 hrs before</th><th data-field="ahead_pct" data-fmt="pct" data-bar="1">1+ day ahead</th><th data-field="week_pct" data-fmt="pct">7+ days ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="sr-panel" id="mix" data-panel="mix" hidden>
+<div class="sr-grid2">
+<div class="sr-card"><h3 class="sr-card-h">Type of sale <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-scroll"><table class="sr-table" id="table-type" data-source="sale_type" data-row-key="key" data-scope="period"><thead><tr><th class="sr-l" data-field="type">Type</th><th data-field="qty" data-fmt="int">Qty</th><th data-field="orders" data-fmt="int">Orders</th><th data-field="net" data-fmt="usd0">Net sales</th><th data-field="pct" data-fmt="pct" data-bar="1">Share</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="sr-card"><h3 class="sr-card-h">How day passes were paid <span class="sr-sub" data-draw="periodname">—</span></h3><div class="sr-scroll"><table class="sr-table" id="table-paid" data-source="paid" data-row-key="key" data-scope="period"><thead><tr><th class="sr-l" data-field="payment">Payment</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct" data-bar="1">Share</th><th data-field="net" data-fmt="usd0">Net sales</th><th data-field="discount" data-fmt="usd0" data-blankzero="1">Discount or credit</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</div>
+<div class="sr-card"><h3 class="sr-card-h">Items <span class="sr-sub" data-draw="periodname">—</span></h3><p class="sr-note">The 40 biggest items by net sales in the period.</p><div class="sr-scroll sr-tall"><table class="sr-table" id="table-items" data-source="items" data-row-key="key" data-scope="period" data-sort="net"><thead><tr><th class="sr-l" data-field="item">Item</th><th class="sr-l" data-field="type">Type</th><th data-field="qty" data-fmt="int">Qty</th><th data-field="net" data-fmt="usd">Net sales</th><th data-field="avg" data-fmt="usd">Avg price</th><th data-field="pct" data-fmt="pct" data-bar="1">Share of sales</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="sr-card"><h3 class="sr-card-h">Promo codes and credit <span class="sr-sub" data-draw="periodname">—</span></h3><p class="sr-note">Discount is the amount taken off list price before tax. Gift card or pass credit is a pass paid with a gift card or a multi-pass bundle, whose money was counted when the card or bundle was sold.</p><div class="sr-scroll sr-tall"><table class="sr-table" id="table-codes" data-source="codes" data-row-key="key" data-scope="period" data-sort="discount"><thead><tr><th class="sr-l" data-field="code">Code</th><th data-field="orders" data-fmt="int">Orders</th><th data-field="items" data-fmt="int">Items</th><th data-field="discount" data-fmt="usd0">Discount</th><th data-field="net_after" data-fmt="usd0" data-blankzero="1">Net after discount</th><th data-field="share" data-fmt="pct" data-bar="1">Share of discounts</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="sr-panel" id="guests" data-panel="guests" hidden>
+<div class="sr-cards">
+<div class="sr-card" id="card-named"><div class="sr-card-l">Guests with an email</div><div class="sr-card-v" data-draw="num" data-src="customers" data-f="guests_named" data-fmt="int">—</div><div class="sr-card-s"><span data-draw="periodname">—</span></div></div>
+<div class="sr-card" id="card-repeat"><div class="sr-card-l">Came more than once</div><div class="sr-card-v" data-draw="num" data-src="customers" data-f="repeat_in_period_pct" data-fmt="pct">—</div><div class="sr-card-s">within the period</div></div>
+<div class="sr-card" id="card-vpg"><div class="sr-card-l">Visits per guest</div><div class="sr-card-v" data-draw="num" data-src="customers" data-f="visits_per_guest" data-fmt="dec">—</div><div class="sr-card-s">within the period</div></div>
+</div>
+<div class="sr-grid2">
+<div class="sr-card"><h3 class="sr-card-h">New and returning guests by month</h3><p class="sr-note">Returning means the guest's first Trybe visit was in an earlier month.</p><div class="sr-scroll"><table class="sr-table" id="table-customers" data-source="customers" data-row-key="key" data-scope="months"><thead><tr><th class="sr-l" data-field="period">Month</th><th data-field="guests_named" data-fmt="int">Guests</th><th data-field="new_guests" data-fmt="int">First visit</th><th data-field="returning" data-fmt="int" data-blankzero="1">Returning</th><th data-field="returning_pct" data-fmt="pct" data-blankzero="1">Returning share</th><th data-field="visits_per_guest" data-fmt="dec">Visits each</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="sr-card"><h3 class="sr-card-h">How often guests come back</h3><p class="sr-note">Every visit since 18 March 2026, grouped by how many times each guest has been.</p><div class="sr-scroll"><table class="sr-table" id="table-freq" data-source="frequency" data-row-key="key"><thead><tr><th class="sr-l" data-field="band">Visits</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct" data-bar="1">Share of guests</th><th data-field="visits" data-fmt="int">Visits</th><th data-field="pct_visits" data-fmt="pct">Share of visits</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</div>
+</section>
+
+<details class="sr-details" id="notes"><summary>About this data</summary>
+<ul>
+<li>A fixed copy of Trybe's Sold items and Sessions exports for the Sana site, pulled on 18 November 2026. Trybe's history starts on 18 March 2026, so March is a part month; November runs to the 17th. Weeks run Monday to Sunday from the week of 28 September, and the current week runs to yesterday. Earlier bookings were in Book4Time and are not here.</li>
+<li>Net sales are Trybe's net total: after discounts, before tax. Day passes paid with a gift card or a multi-pass bundle show no net sales on the visit, because Trybe counts that money when the card or bundle is sold, so net per guest understates what each visit is worth.</li>
+<li>Guests are SANA Pass session guests by visit date. Occupancy is guests booked against slot capacity from the Sessions export (5 guests per 2.5-hour slot, a slot every 15 minutes); test sessions and the old Book4Time day passes are left out.</li>
+<li>Booking lead is the time from the order being placed in Trybe to the start of the session. Passes rung in at the front desk as guests arrive count as walk-ins. Online covers trybe.com bookings; Reserve with Google is shown on its own.</li>
+<li>Guest counts and repeat visits use the email on the booking, so walk-ins without an email are left out of the Guests tab. No names or emails are stored in this dashboard.</li>
+</ul>
+</details>
+</div>
+</div>
+<footer class="site-foot">Data: Trybe Sold items and Sessions exports, pulled 18 November 2026. <a href="iphone/">Open the phone version</a></footer>
+<script src="assets/desktop.js"></script>
+<script>dash.__start('data/');</script>
+</body></html>
