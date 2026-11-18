@@ -67,7 +67,7 @@
 </header>
 <div class="mb-period" id="controls"><label for="mb-period">Period</label><select id="mb-period" class="dash-select" data-draw="period" aria-label="Period" data-source="monthly"></select></div>
 
-<nav class="mb-tabs" id="tabs" role="tablist"><button type="button" class="mb-tab mb-on" role="tab" aria-selected="true" data-tab="overview">Overview</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="hours">By hour</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="buying">When they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="mix">What they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="guests">Guests</button></nav>
+<nav class="mb-tabs" id="tabs" role="tablist"><button type="button" class="mb-tab mb-on" role="tab" aria-selected="true" data-tab="overview">Overview</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="hours">By hour</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="buying">When they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="mix">What they buy</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="guests">Guests</button><button type="button" class="mb-tab" role="tab" aria-selected="false" data-tab="founding">Founding</button></nav>
 
 <section class="mb-panel" id="overview" data-panel="overview">
 <div class="mb-cards">
@@ -115,6 +115,21 @@
 </div>
 <div class="mb-card"><h3 class="mb-h">New and returning</h3><p class="mb-note">Returning means their first Trybe visit was in an earlier month.</p><div class="mb-tw"><table class="mb-table" id="table-customers" data-source="customers" data-row-key="key" data-scope="months"><thead><tr><th class="mb-l" data-field="period" data-fmt="mon">Month</th><th data-field="guests_named" data-fmt="int">Guests</th><th data-field="new_guests" data-fmt="int">New</th><th data-field="returning_pct" data-fmt="pct0" data-blankzero="1">Returning</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
 <div class="mb-card"><h3 class="mb-h">How often guests come back</h3><div class="mb-tw"><table class="mb-table" id="table-freq" data-source="frequency" data-row-key="key"><thead><tr><th class="mb-l" data-field="band">Visits</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="pct" data-fmt="pct0">Guests</th><th data-field="pct_visits" data-fmt="pct0">Visits</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+</section>
+
+<section class="mb-panel" id="founding" data-panel="founding" hidden>
+<p class="mb-note">Founding Memberships only ($200 a month; one at $400). Revenue is fees collected plus sign-ups. Visits are day passes booked under the member's email. A day pass is $60 before tax.</p>
+<div class="mb-cards">
+<div class="mb-card" id="card-f-active"><div class="mb-cl">Active members</div><div class="mb-cv" data-draw="num" data-src="founding" data-f="active" data-fmt="int">—</div><div class="mb-cs" data-draw="periodname">—</div></div>
+<div class="mb-card" id="card-f-rev"><div class="mb-cl">Revenue</div><div class="mb-cv" data-draw="num" data-src="founding" data-f="revenue" data-fmt="usd0">—</div><div class="mb-cs">fees + sign-ups</div></div>
+<div class="mb-card" id="card-f-visits"><div class="mb-cl">Member visits</div><div class="mb-cv" data-draw="num" data-src="founding" data-f="visits" data-fmt="int">—</div><div class="mb-cs"><span data-draw="num" data-src="founding" data-f="guest_share" data-fmt="pct">—</span> of all guests</div></div>
+<div class="mb-card" id="card-f-pervisit"><div class="mb-cl">Revenue per visit</div><div class="mb-cv" data-draw="num" data-src="founding" data-f="per_visit" data-fmt="usd">—</div><div class="mb-cs">by month (fees land on the 1st)</div></div>
+</div>
+<div class="mb-card"><h3 class="mb-h" id="h-frev">Revenue by month</h3><div class="mb-chart" id="chart-frev" data-draw="chart_frev" data-source="founding">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-fvis">Member visits by month</h3><div class="mb-chart" id="chart-fvis" data-draw="chart_fvis" data-source="founding">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-ffreq">How often members come in</h3><p class="mb-note">Current members by average visits a month since joining.</p><div class="mb-tw"><table class="mb-table" id="table-ffreq" data-source="founding_freq" data-row-key="key"><thead><tr><th class="mb-l" data-field="band">Visits</th><th data-field="members" data-fmt="int">Members</th><th data-field="pct_visits" data-fmt="pct0">Of visits</th><th data-field="per_visit" data-fmt="usd0">Per visit</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-fmonths">Month by month</h3><div class="mb-tw"><table class="mb-table" id="table-fmonths" data-source="founding" data-row-key="key" data-scope="months"><thead><tr><th class="mb-l" data-field="label" data-fmt="mon">Month</th><th data-field="active" data-fmt="int">Members</th><th data-field="revenue" data-fmt="usdk">Revenue</th><th data-field="visits" data-fmt="int">Visits</th><th data-field="per_visit" data-fmt="usd0">Per visit</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-fweeks">Week by week</h3><div class="mb-tw"><table class="mb-table" id="table-fweeks" data-source="founding" data-row-key="key" data-scope="weeks"><thead><tr><th class="mb-l" data-field="label" data-fmt="mon">Week of</th><th data-field="active" data-fmt="int">Members</th><th data-field="visits" data-fmt="int">Visits</th><th data-field="visits_per_member" data-fmt="dec">Per member</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
 </section>
 
 <details class="mb-details" id="notes"><summary>About this data</summary>

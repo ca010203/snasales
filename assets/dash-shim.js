@@ -1,6 +1,6 @@
 // Minimal stand-in for the dashboard runtime, so the same page code runs as a static site.
 (function () {
-  const IDS = ['monthly', 'hourly', 'daily', 'ahead', 'lead', 'lead_dow', 'buy_heat', 'channel', 'party', 'paid', 'sale_type', 'items', 'codes', 'customers', 'frequency'];
+  const IDS = ['monthly', 'hourly', 'daily', 'ahead', 'lead', 'lead_dow', 'buy_heat', 'channel', 'party', 'paid', 'sale_type', 'items', 'codes', 'customers', 'frequency', 'founding', 'founding_freq'];
   const store = {};
   IDS.forEach((id) => { store[id] = { status: 'loading', data: [] }; });
   const draws = new Map();

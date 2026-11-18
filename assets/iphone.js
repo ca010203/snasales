@@ -6,8 +6,8 @@ const F = {
   txt: (v) => v
 };
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const PANELS = ['overview', 'hours', 'buying', 'mix', 'guests'];
-const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_wsales', 'chart_wocc', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
+const PANELS = ['overview', 'hours', 'buying', 'mix', 'guests', 'founding'];
+const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_wsales', 'chart_wocc', 'chart_frev', 'chart_fvis', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
 const period = () => dash.params().period || 'All';
 const dowP = () => dash.params().dow || 'All';
 const chP = () => dash.params().ch || 'All';
@@ -187,6 +187,9 @@ function monthBars(el, rows, series, fmt, label, line) {
     svg.selectAll('text.mb-ptl').data(rows).join('text').attr('class', 'mb-lbl mb-ptl').attr('x', (r) => x(r.key) + x.bandwidth() / 2).attr('y', (r) => y2(+r[line.key]) - 7).attr('text-anchor', 'middle').style('pointer-events', 'none').text((r) => d3.format('.0f')(+r[line.key]) + '%');
   }
 }
+const fmonths = () => { const d = got('founding'); return d && d.filter((r) => r.kind === 'month' && r.key !== '2026-03'); };
+dash.draw('chart_frev', (el) => monthBars(el, fmonths(), [['charges', 'Monthly fees'], ['signups', 'Sign-ups']], 'usd', 'Founding membership revenue per month'));
+dash.draw('chart_fvis', (el) => monthBars(el, fmonths(), [['visits', 'Member visits']], 'num', 'Founding member visits per month'));
 const months = () => { const d = got('monthly'); return d && d.filter((r) => r.kind === 'month'); };
 const weeks = () => { const d = got('monthly'); return d && d.filter((r) => r.kind === 'week'); };
 dash.draw('chart_wsales', (el) => monthBars(el, weeks(), [['pass_net', 'Day passes'], ['other_net', 'Everything else']], 'usd', 'Net sales per week'));
