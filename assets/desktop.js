@@ -6,7 +6,7 @@ const F = {
 };
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const PANELS = ['overview', 'occupancy', 'buying', 'mix', 'guests', 'founding'];
-const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_wsales', 'chart_wocc', 'chart_frev', 'chart_fvis', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
+const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_wsales', 'chart_wocc', 'chart_frev', 'chart_fvis', 'chart_fhour', 'heat_fhour', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
 const period = () => dash.params().period || 'All';
 const dowP = () => dash.params().dow || 'All';
 const chP = () => dash.params().ch || 'All';
@@ -269,6 +269,47 @@ dash.draw('heat_occ', (el) => {
   const cells = d && d.filter((r) => r.period === period() && r.dow !== 'All' && +r.hour >= 7 && +r.hour <= 22);
   heat(el, cells, d3.range(7, 23), (c) => +c.occ_pct, (v) => d3.format('.0f')(v), 'Occupancy by weekday and hour',
     (d, h, c) => [DAYNAME[d] + ', ' + hourLabel(h) + ' to ' + hourLabel(h + 1), 'Occupancy: ' + F.pct(+c.occ_pct), 'On site: ' + F.dec(+c.on_site) + ' of ' + F.dec(+c.capacity), { t: 'Averaged over ' + c.days + ' ' + DAYNAME[d] + 's', sub: true }]);
+});
+// Founding member arrivals by start hour, with their share of everyone arriving that hour.
+dash.draw('chart_fhour', (el) => {
+  const d = got('founding_hourly');
+  el.replaceChildren();
+  if (!d) { el.textContent = '—'; return; }
+  const rows = d.filter((r) => r.period === period() && r.dow === dowP()).sort((a, b) => +a.hour - +b.hour);
+  if (!rows.length || !d3.sum(rows, (r) => +r.members)) { el.textContent = 'No founding member visits in this period.'; return; }
+  legend(el, [['Member arrivals', color0()], ['Share of all guests that hour (right axis)', null, true]]);
+  const box = d3.select(el).append('div').attr('class', 'sr-chartbox');
+  const W = Math.max(280, el.clientWidth), H = 260, m = { t: 20, r: 38, b: 26, l: 34 };
+  const svg = box.append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('role', 'img').attr('aria-label', 'Founding member arrivals by hour of day, with their share of all guests');
+  const x = d3.scaleBand().domain(rows.map((r) => r.hour)).range([m.l, W - m.r]).padding(0.2);
+  const y = d3.scaleLinear().domain([0, d3.max(rows, (r) => +r.members) || 1]).nice(4).range([H - m.b, m.t]);
+  const y2 = d3.scaleLinear().domain([0, Math.max(10, d3.max(rows, (r) => +r.member_share))]).nice(4).range([H - m.b, m.t]);
+  const every = Math.ceil(rows.length / Math.max(1, Math.floor((W - m.l) / 40)));
+  svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).tickSize(0).tickPadding(8).tickValues(rows.map((r) => r.hour).filter((_, i) => i % every === 0)).tickFormat(hourLabel))
+    .call((g) => g.select('.domain').remove());
+  svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(${m.l},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(d3.format('d')))
+    .call((g) => g.select('.domain').remove());
+  svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(${W - m.r},0)`)
+    .call(d3.axisRight(y2).ticks(4).tickSize(0).tickPadding(6).tickFormat((v) => v + '%'))
+    .call((g) => g.select('.domain').remove());
+  const tip = tipper(box, W);
+  const g = svg.selectAll('g.sr-h').data(rows).join('g').attr('class', 'sr-h')
+    .on('pointermove', (ev, r) => tip.show([hourLabel(r.hour) + ' to ' + hourLabel(+r.hour + 1) + ' arrivals', 'Founding members: ' + F.int(+r.members), 'All guests: ' + F.int(+r.all_guests), 'Members are ' + F.pct(+r.member_share) + ' of guests', { t: F.pct(+r.pct_of_member_visits) + ' of all member visits', sub: true }], x(r.hour) + x.bandwidth() / 2, m.t))
+    .on('pointerleave', () => tip.hide());
+  g.append('rect').attr('x', (r) => x(r.hour)).attr('y', m.t).attr('width', x.bandwidth()).attr('height', H - m.b - m.t).style('fill', 'transparent');
+  g.append('rect').attr('x', (r) => x(r.hour)).attr('width', x.bandwidth()).attr('y', (r) => y(+r.members)).attr('height', (r) => Math.max(0, y(0) - y(+r.members))).attr('rx', 2).style('fill', color0());
+  if (x.bandwidth() >= 18) g.append('text').attr('class', 'sr-barlabel').attr('x', (r) => x(r.hour) + x.bandwidth() / 2).attr('y', (r) => y(+r.members) - 5).attr('text-anchor', 'middle').text((r) => +r.members ? F.int(+r.members) : '');
+  const ln = d3.line().x((r) => x(r.hour) + x.bandwidth() / 2).y((r) => y2(+r.member_share));
+  svg.append('path').datum(rows).attr('d', ln).style('fill', 'none').style('stroke', 'var(--cds-chart-reference)').style('stroke-width', 2).style('stroke-dasharray', '5 4').style('pointer-events', 'none');
+  svg.selectAll('circle.sr-pt').data(rows).join('circle').attr('class', 'sr-pt').attr('cx', (r) => x(r.hour) + x.bandwidth() / 2).attr('cy', (r) => y2(+r.member_share)).attr('r', 3).style('fill', 'var(--cds-chart-reference)').style('pointer-events', 'none');
+});
+dash.draw('heat_fhour', (el) => {
+  const d = got('founding_hourly');
+  const cells = d && d.filter((r) => r.period === period() && r.dow !== 'All');
+  heat(el, cells, d3.range(7, 21), (c) => +c.members, (v) => d3.format('d')(v), 'Founding member arrivals by weekday and hour',
+    (d, h, c) => [DAYNAME[d] + ', ' + hourLabel(h) + ' to ' + hourLabel(h + 1), F.int(+c.members) + ' founding members of ' + F.int(+c.all_guests) + ' guests', 'Member share: ' + F.pct(+c.member_share)]);
 });
 dash.draw('heat_buy', (el) => {
   const d = got('buy_heat');
