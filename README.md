@@ -1,4 +1,4 @@
-# Sana · Trybe bookings dashboard
+# Sana - Wellness Sales
 
 Static dashboard of SANA bookings, occupancy and buying patterns from Trybe exports.
 

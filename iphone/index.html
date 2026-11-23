@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Sana · Trybe bookings (phone)</title>
+<title>Sana - Wellness Sales (phone)</title>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/d3.min.js"></script>
 <script src="../assets/dash-shim.js"></script>
@@ -62,7 +62,7 @@
 </style>
 <div class="mb-wrap">
 <header id="top">
-<h1 class="mb-title">Sana · Trybe bookings</h1>
+<h1 class="mb-title">Sana - Wellness Sales</h1>
 <p class="mb-lede">Since 18 Mar 2026: <b data-draw="num" data-k="All" data-f="net">—</b> net from <b data-draw="num" data-k="All" data-f="guests" data-fmt="int">—</b> guests. <b data-draw="num" data-k="All" data-f="same_day_pct" data-fmt="pct">—</b> book the day they visit; capacity runs at <b data-draw="num" data-k="All" data-f="occ_pct" data-fmt="pct">—</b>.</p>
 </header>
 <div class="mb-period" id="controls"><label for="mb-period">Period</label><select id="mb-period" class="dash-select" data-draw="period" aria-label="Period" data-source="monthly"></select></div>
@@ -90,7 +90,7 @@
 <div class="mb-card"><h3 class="mb-h" id="h-hourly">Guests on site by hour <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-ctl"><label for="mb-dow">Day</label><select id="mb-dow" class="dash-select mb-sel mb-dowsel" aria-label="Day of week"><option value="All">Every day</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option><option value="Sat">Saturday</option><option value="Sun">Sunday</option></select></div><p class="mb-note">Average guests in the facility each hour vs. what the slots allow (5 guests per 2.5-hour slot, a slot every 15 minutes, about 50 at once). Percent is the share booked.</p><div class="mb-chart" id="chart-hourly" data-draw="chart_hourly" data-source="hourly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-heat-occ">Occupancy by day and hour <span class="mb-sub" data-draw="periodname">—</span></h3><p class="mb-note">Share of capacity booked. Darker is fuller.</p><div class="mb-chart mb-heat" id="heat-occ" data-draw="heat_occ" data-source="hourly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-daily">Guests each day <span class="mb-sub" data-draw="periodname">—</span></h3><div class="mb-chart" id="chart-daily" data-draw="chart_daily" data-source="daily">—</div></div>
-<div class="mb-card"><h3 class="mb-h" id="h-ahead">Already on the books</h3><p class="mb-note">Guests booked for upcoming days as of 18 Nov 2026. Most book within a day, so these fill in late.</p><div class="mb-chart" id="chart-ahead" data-draw="chart_ahead" data-source="ahead">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-ahead">Already on the books</h3><p class="mb-note">Guests booked for upcoming days as of 23 Nov 2026. Most book within a day, so these fill in late.</p><div class="mb-chart" id="chart-ahead" data-draw="chart_ahead" data-source="ahead">—</div></div>
 </section>
 
 <section class="mb-panel" id="buying" data-panel="buying" hidden>
@@ -136,7 +136,7 @@
 
 <details class="mb-details" id="notes"><summary>About this data</summary>
 <ul>
-<li>Phone version of the Sana Trybe dashboard, with the same data: Trybe's Sold items and Sessions exports pulled 18 Nov 2026. Trybe starts 18 Mar 2026; November runs to the 17th. Weeks run Monday to Sunday from 28 Sep; the current week runs to yesterday.</li>
+<li>Phone version of the Sana Trybe dashboard, with the same data: Trybe's Sold items and Sessions exports pulled 23 Nov 2026. Trybe starts 18 Mar 2026; November runs to the 22nd. Weeks run Monday to Sunday from 28 Sep; the current week runs to yesterday.</li>
 <li>Net sales are after discounts, before tax. Passes paid with a gift card or multi-pass show $0 on the visit, since Trybe counts that money when the card or bundle sells.</li>
 <li>Occupancy is guests booked against slot capacity: 5 per 2.5-hour SANA Pass slot, a slot every 15 minutes. Test sessions and old Book4Time passes are left out.</li>
 <li>Booking lead is order time to session start. Front-desk passes rung in on arrival count as walk-ins. Guest and repeat counts use the booking email; no names or emails are stored.</li>
@@ -144,7 +144,7 @@
 </details>
 </div>
 </div>
-<footer class="site-foot">Data: Trybe Sold items and Sessions exports, pulled 18 November 2026. <a href="../">Open the desktop version</a></footer>
+<footer class="site-foot">Data: Trybe Sold items and Sessions exports, pulled 23 November 2026. <a href="../">Open the desktop version</a></footer>
 <script src="../assets/iphone.js"></script>
 <script>dash.__start('../data/');</script>
 </body></html>

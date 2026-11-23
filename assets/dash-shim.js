@@ -63,7 +63,7 @@
       }
       const gate = document.createElement('div');
       gate.className = 'gate';
-      gate.innerHTML = '<div class="gate-card"><div class="gate-title">Sana \u00b7 Trybe bookings</div><p class="gate-sub">Enter the password to view this dashboard.</p><input type="password" class="gate-in" autocomplete="current-password" placeholder="Password" aria-label="Password"><label class="gate-rem"><input type="checkbox" class="gate-chk"> Remember on this device</label><button type="button" class="gate-btn">Open</button><p class="gate-err" hidden>That password didn\u2019t work.</p></div>';
+      gate.innerHTML = '<div class="gate-card"><div class="gate-title">Sana - Wellness Sales</div><p class="gate-sub">Enter the password to view this dashboard.</p><input type="password" class="gate-in" autocomplete="current-password" placeholder="Password" aria-label="Password"><label class="gate-rem"><input type="checkbox" class="gate-chk"> Remember on this device</label><button type="button" class="gate-btn">Open</button><p class="gate-err" hidden>That password didn\u2019t work.</p></div>';
       document.body.classList.add('locked');
       document.body.prepend(gate);
       const inp = gate.querySelector('.gate-in'), btn = gate.querySelector('.gate-btn'), err = gate.querySelector('.gate-err'), chk = gate.querySelector('.gate-chk');
