@@ -37,6 +37,7 @@
 .sr-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs) var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-sm)}
 .sr-key{display:inline-flex;align-items:center;gap:6px}
 .sr-key i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.sr-keybtn{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer}
 .sr-key i.sr-dash{height:0;border-top:2px dashed var(--cds-chart-reference);border-radius:0;width:14px}
 .sr-axis text{fill:var(--cds-text-secondary);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans)}
 .sr-axis line{stroke:var(--cds-chart-grid)}
@@ -88,6 +89,7 @@
 <div class="sr-card"><h3 class="sr-card-h" id="h-chart-sales">Net sales by month</h3><div class="sr-chart" id="chart-sales" data-draw="chart_sales" data-source="monthly">—</div></div>
 <div class="sr-card"><h3 class="sr-card-h" id="h-chart-occm">Guests per day and occupancy by month</h3><div class="sr-chart" id="chart-occm" data-draw="chart_occm" data-source="monthly">—</div></div>
 </div>
+<div class="sr-card"><h3 class="sr-card-h" id="h-chart-occday">Average occupancy by hour, each day of the week <span class="sr-sub" data-draw="periodname">—</span></h3><p class="sr-note">Share of booking capacity filled in each clock hour, averaged over the open days in the period. Click a day in the key to pick it out, and click it again to show every day.</p><div class="sr-chart" id="chart-occday" data-draw="chart_occday" data-source="hourly">—</div></div>
 <div class="sr-grid2">
 <div class="sr-card"><h3 class="sr-card-h" id="h-chart-wsales">Net sales by week</h3><div class="sr-chart" id="chart-wsales" data-draw="chart_wsales" data-source="monthly">—</div></div>
 <div class="sr-card"><h3 class="sr-card-h" id="h-chart-wocc">Guests per day and occupancy by week</h3><div class="sr-chart" id="chart-wocc" data-draw="chart_wocc" data-source="monthly">—</div></div>

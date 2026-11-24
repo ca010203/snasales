@@ -5,7 +5,7 @@
   --cds-surface-popover:#ffffff;--cds-border:#dcdcd8;--cds-shadow-popover:0 4px 16px rgba(0,0,0,.08);
   --cds-font-size-caption:12.5px;--cds-font-size-body:14px;--cds-font-size-heading:19px;--cds-font-size-title:24px;
   --cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:12px;--cds-gap-lg:20px;--cds-pad-sm:8px;--cds-pad-lg:16px;--cds-radius:12px;
-  --c0:#2f74d8;--c1:#ec7a33;--c2:#5aa469;--c3:#9b6fd0;--c4:#d4a72c;--c5:#59a5b4;
+  --c0:#2f74d8;--c1:#ec7a33;--c2:#5aa469;--c3:#9b6fd0;--c4:#d4a72c;--c5:#59a5b4;--c6:#c75b8f;--c7:#7d8a96;
   color-scheme:light dark;
 }
 @media (prefers-color-scheme: dark){

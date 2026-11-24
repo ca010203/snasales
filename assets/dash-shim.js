@@ -43,7 +43,7 @@
     loader: () => {},
     refresh: () => {},
     setLink: (name) => history.replaceState(null, '', location.pathname + location.search + '#' + name),
-    colors: ['var(--c0)', 'var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'],
+    colors: ['var(--c0)', 'var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)'],
     __start: (base) => {
       const b64 = (s) => Uint8Array.from(atob(s.trim()), (c) => c.charCodeAt(0));
       async function keyFor(pw, meta) {

@@ -6,7 +6,7 @@ const F = {
 };
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const PANELS = ['overview', 'occupancy', 'buying', 'mix', 'guests', 'founding'];
-const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_wsales', 'chart_wocc', 'chart_frev', 'chart_fvis', 'chart_fhour', 'heat_fhour', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
+const DRAWINGS = ['num', 'period', 'periodname', 'rows', 'chart_sales', 'chart_occm', 'chart_occday', 'chart_wsales', 'chart_wocc', 'chart_frev', 'chart_fvis', 'chart_fhour', 'heat_fhour', 'chart_hourly', 'heat_occ', 'chart_daily', 'chart_ahead', 'chart_lead', 'heat_buy'];
 const period = () => dash.params().period || 'All';
 const dowP = () => dash.params().dow || 'All';
 const chP = () => dash.params().ch || 'All';
@@ -310,6 +310,59 @@ dash.draw('heat_fhour', (el) => {
   const cells = d && d.filter((r) => r.period === period() && r.dow !== 'All');
   heat(el, cells, d3.range(7, 21), (c) => +c.members, (v) => d3.format('d')(v), 'Founding member arrivals by weekday and hour',
     (d, h, c) => [DAYNAME[d] + ', ' + hourLabel(h) + ' to ' + hourLabel(h + 1), F.int(+c.members) + ' founding members of ' + F.int(+c.all_guests) + ' guests', 'Member share: ' + F.pct(+c.member_share)]);
+});
+// Average occupancy through the day, one line per weekday. Click a day in the key to pick it out.
+window.srOccFocus = null;
+dash.draw('chart_occday', (el) => {
+  const d = got('hourly');
+  el.replaceChildren();
+  if (!d) { el.textContent = '—'; return; }
+  const rows = d.filter((r) => r.period === period() && +r.hour >= 7 && +r.hour <= 22 && +r.capacity > 0);
+  const days = ['All', ...WEEK].filter((w) => rows.some((r) => r.dow === w && +r.on_site > 0));
+  if (!days.length) { el.textContent = 'No sessions in this period.'; return; }
+  const hours = d3.range(7, 23).filter((h) => rows.some((r) => +r.hour === h));
+  const col = (w) => w === 'All' ? 'var(--cds-chart-reference)' : dash.colors[WEEK.indexOf(w) % dash.colors.length];
+  const dashOf = (w) => w === 'All' ? '5 4' : (WEEK.indexOf(w) >= dash.colors.length ? '2 3' : null);
+  const name = (w) => w === 'All' ? 'Every day' : DAYNAME[w];
+  const focus = days.includes(window.srOccFocus) ? window.srOccFocus : null;
+  const lg = d3.select(el).append('div').attr('class', 'sr-legend');
+  days.forEach((w) => {
+    const it = lg.append('button').attr('type', 'button').attr('class', 'sr-key sr-keybtn').attr('aria-pressed', focus === w ? 'true' : 'false').style('opacity', focus && focus !== w ? 0.45 : 1)
+      .on('click', () => { window.srOccFocus = focus === w ? null : w; dash.draw('chart_occday'); });
+    const i = it.append('i');
+    if (w === 'All') i.attr('class', 'sr-dash'); else i.style('background', col(w));
+    it.append('span').text(w === 'All' ? 'Every day' : w);
+  });
+  const box = d3.select(el).append('div').attr('class', 'sr-chartbox');
+  const W = Math.max(280, el.clientWidth), H = 270, m = { t: 14, r: 12, b: 26, l: 40 };
+  const svg = box.append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('role', 'img').attr('aria-label', 'Average occupancy by hour of the day, for each day of the week');
+  const x = d3.scalePoint().domain(hours).range([m.l, W - m.r]).padding(0.3);
+  const shown = rows.filter((r) => days.includes(r.dow));
+  const y = d3.scaleLinear().domain([0, Math.max(10, d3.max(shown, (r) => +r.occ_pct))]).nice(4).range([H - m.b, m.t]);
+  const every = Math.ceil(hours.length / Math.max(1, Math.floor((W - m.l) / 40)));
+  svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).tickSize(0).tickPadding(8).tickValues(hours.filter((_, i) => i % every === 0)).tickFormat(hourLabel))
+    .call((g) => g.select('.domain').remove());
+  svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(${m.l},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat((v) => v + '%'))
+    .call((g) => g.select('.domain').remove());
+  const by = d3.group(shown, (r) => r.dow);
+  const ln = d3.line().x((r) => x(+r.hour)).y((r) => y(+r.occ_pct));
+  days.filter((w) => w !== focus).concat(focus ? [focus] : []).forEach((w) => {
+    const pts = (by.get(w) || []).slice().sort((a, b) => +a.hour - +b.hour);
+    svg.append('path').datum(pts).attr('d', ln).style('fill', 'none').style('stroke', col(w)).style('stroke-width', focus === w ? 3 : (w === 'All' ? 2.5 : 1.75))
+      .style('stroke-dasharray', dashOf(w)).style('stroke-linejoin', 'round').style('opacity', focus && focus !== w ? 0.15 : 1).style('pointer-events', 'none');
+  });
+  const tip = tipper(box, W);
+  const step = hours.length > 1 ? x(hours[1]) - x(hours[0]) : W - m.l - m.r;
+  const guide = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--color-border-line)').style('stroke-width', 1).style('opacity', 0).style('pointer-events', 'none');
+  const hov = svg.selectAll('rect.sr-hov').data(hours).join('rect').attr('class', 'sr-hov').attr('x', (h) => x(h) - step / 2).attr('y', m.t).attr('width', step).attr('height', H - m.b - m.t).style('fill', 'transparent');
+  const show = (ev, h) => {
+    guide.attr('x1', x(h)).attr('x2', x(h)).style('opacity', 1);
+    const lines = (focus ? [focus] : days).map((w) => { const r = (by.get(w) || []).find((q) => +q.hour === h); return r ? name(w) + ': ' + F.pct(+r.occ_pct) + ' (' + F.dec(+r.on_site) + ' on site)' : null; }).filter(Boolean);
+    tip.show([hourLabel(h) + ' to ' + hourLabel(h + 1), ...lines], x(h), m.t);
+  };
+  hov.on('pointermove', show).on('pointerleave', () => { guide.style('opacity', 0); tip.hide(); });
 });
 dash.draw('heat_buy', (el) => {
   const d = got('buy_heat');
