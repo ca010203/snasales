@@ -311,33 +311,51 @@ dash.draw('heat_fhour', (el) => {
   heat(el, cells, d3.range(7, 21), (c) => +c.members, (v) => d3.format('d')(v), 'Founding member arrivals by weekday and hour',
     (d, h, c) => [DAYNAME[d] + ', ' + hourLabel(h) + ' to ' + hourLabel(h + 1), F.int(+c.members) + ' founding members of ' + F.int(+c.all_guests) + ' guests', 'Member share: ' + F.pct(+c.member_share)]);
 });
-// Average occupancy through the day, one line per weekday. Click a day in the key to pick it out.
+// Average occupancy through the day: one line per weekday, week or month. Click a line in the key to pick it out.
 window.srOccFocus = null;
+window.srOccMode = 'day';
 dash.draw('chart_occday', (el) => {
   const d = got('hourly');
   el.replaceChildren();
   if (!d) { el.textContent = '—'; return; }
-  const rows = d.filter((r) => r.period === period() && +r.hour >= 7 && +r.hour <= 22 && +r.capacity > 0);
-  const days = ['All', ...WEEK].filter((w) => rows.some((r) => r.dow === w && +r.on_site > 0));
-  if (!days.length) { el.textContent = 'No sessions in this period.'; return; }
-  const hours = d3.range(7, 23).filter((h) => rows.some((r) => +r.hour === h));
-  const col = (w) => w === 'All' ? 'var(--cds-chart-reference)' : dash.colors[WEEK.indexOf(w) % dash.colors.length];
-  const dashOf = (w) => w === 'All' ? '5 4' : (WEEK.indexOf(w) >= dash.colors.length ? '2 3' : null);
-  const name = (w) => w === 'All' ? 'Every day' : DAYNAME[w];
-  const focus = days.includes(window.srOccFocus) ? window.srOccFocus : null;
+  const mode = window.srOccMode;
+  const seg = d3.select(el).append('div').attr('class', 'sr-tabs').attr('role', 'group').attr('aria-label', 'Draw a line for each').style('margin-bottom', '10px');
+  [['day', 'Day of week'], ['week', 'Week'], ['month', 'Month']].forEach(([k, l]) => seg.append('button').attr('type', 'button').attr('class', 'sr-tab' + (mode === k ? ' sr-on' : '')).attr('aria-pressed', mode === k ? 'true' : 'false').text(l)
+    .on('click', () => { if (mode !== k) { window.srOccMode = k; window.srOccFocus = null; dash.draw('chart_occday'); } }));
+  const ok = (r) => +r.hour >= 7 && +r.hour <= 22 && +r.capacity > 0;
+  let rows, groups, keyOf, short, name;
+  if (mode === 'day') {
+    rows = d.filter((r) => r.period === period() && ok(r));
+    const nd = (w) => +((rows.find((r) => r.dow === w) || {}).days || 0); const most = d3.max(WEEK, nd) || 0;
+    groups = ['All', ...WEEK].filter((w) => rows.some((r) => r.dow === w && +r.on_site > 0) && (w === 'All' || nd(w) >= most / 4));
+    keyOf = (r) => r.dow; short = (w) => w === 'All' ? 'Every day' : w; name = (w) => w === 'All' ? 'Every day' : DAYNAME[w];
+  } else {
+    const per = (got('monthly') || []).filter((r) => r.kind === mode);
+    const lab = new Map(per.map((r) => [r.key, r.month]));
+    rows = d.filter((r) => r.dow === 'All' && ok(r) && (r.period === 'All' || lab.has(r.period)));
+    groups = ['All', ...per.map((r) => r.key).filter((k) => rows.some((r) => r.period === k && +r.on_site > 0))];
+    keyOf = (r) => r.period; short = (k) => k === 'All' ? 'All time' : monthLabel(k); name = (k) => k === 'All' ? 'Since 18 Mar' : lab.get(k);
+  }
+  if (groups.length < 2) { el.append('No sessions in this period.'); return; }
+  const n = groups.length - 1;
+  const col = (g) => g === 'All' ? 'var(--cds-chart-reference)' : mode === 'day' ? dash.colors[WEEK.indexOf(g) % dash.colors.length] : color0();
+  const shade = (g) => g === 'All' || mode === 'day' ? 1 : 0.22 + 0.78 * (n > 1 ? (groups.indexOf(g) - 1) / (n - 1) : 1);
+  const dashOf = (g) => g === 'All' ? '5 4' : (mode === 'day' && WEEK.indexOf(g) >= dash.colors.length ? '2 3' : null);
+  const focus = window.srOccFocus === '' ? null : groups.includes(window.srOccFocus) ? window.srOccFocus : (mode !== 'day' && groups.includes(period()) && period() !== 'All' ? period() : null);
   const lg = d3.select(el).append('div').attr('class', 'sr-legend');
-  days.forEach((w) => {
-    const it = lg.append('button').attr('type', 'button').attr('class', 'sr-key sr-keybtn').attr('aria-pressed', focus === w ? 'true' : 'false').style('opacity', focus && focus !== w ? 0.45 : 1)
-      .on('click', () => { window.srOccFocus = focus === w ? null : w; dash.draw('chart_occday'); });
+  groups.forEach((g) => {
+    const it = lg.append('button').attr('type', 'button').attr('class', 'sr-key sr-keybtn').attr('aria-pressed', focus === g ? 'true' : 'false').style('opacity', focus && focus !== g ? 0.45 : 1)
+      .on('click', () => { window.srOccFocus = focus === g ? '' : g; dash.draw('chart_occday'); });
     const i = it.append('i');
-    if (w === 'All') i.attr('class', 'sr-dash'); else i.style('background', col(w));
-    it.append('span').text(w === 'All' ? 'Every day' : w);
+    if (g === 'All') i.attr('class', 'sr-dash'); else i.style('background', col(g)).style('opacity', shade(g));
+    it.append('span').text(short(g));
   });
   const box = d3.select(el).append('div').attr('class', 'sr-chartbox');
   const W = Math.max(280, el.clientWidth), H = 270, m = { t: 14, r: 12, b: 26, l: 40 };
-  const svg = box.append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('role', 'img').attr('aria-label', 'Average occupancy by hour of the day, for each day of the week');
+  const svg = box.append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('role', 'img').attr('aria-label', 'Average occupancy by hour of the day, one line for each ' + (mode === 'day' ? 'day of the week' : mode));
+  const hours = d3.range(7, 23).filter((h) => rows.some((r) => +r.hour === h));
   const x = d3.scalePoint().domain(hours).range([m.l, W - m.r]).padding(0.3);
-  const shown = rows.filter((r) => days.includes(r.dow));
+  const shown = rows.filter((r) => groups.includes(keyOf(r)));
   const y = d3.scaleLinear().domain([0, Math.max(10, d3.max(shown, (r) => +r.occ_pct))]).nice(4).range([H - m.b, m.t]);
   const every = Math.ceil(hours.length / Math.max(1, Math.floor((W - m.l) / 40)));
   svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(0,${H - m.b})`)
@@ -346,12 +364,13 @@ dash.draw('chart_occday', (el) => {
   svg.append('g').attr('class', 'sr-axis').attr('transform', `translate(${m.l},0)`)
     .call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat((v) => v + '%'))
     .call((g) => g.select('.domain').remove());
-  const by = d3.group(shown, (r) => r.dow);
+  const by = d3.group(shown, keyOf);
   const ln = d3.line().x((r) => x(+r.hour)).y((r) => y(+r.occ_pct));
-  days.filter((w) => w !== focus).concat(focus ? [focus] : []).forEach((w) => {
-    const pts = (by.get(w) || []).slice().sort((a, b) => +a.hour - +b.hour);
-    svg.append('path').datum(pts).attr('d', ln).style('fill', 'none').style('stroke', col(w)).style('stroke-width', focus === w ? 3 : (w === 'All' ? 2.5 : 1.75))
-      .style('stroke-dasharray', dashOf(w)).style('stroke-linejoin', 'round').style('opacity', focus && focus !== w ? 0.15 : 1).style('pointer-events', 'none');
+  groups.filter((g) => g !== focus).concat(focus ? [focus] : []).forEach((g) => {
+    const pts = (by.get(g) || []).slice().sort((a, b) => +a.hour - +b.hour);
+    svg.append('path').datum(pts).attr('d', ln).style('fill', 'none').style('stroke', col(g)).style('stroke-opacity', focus === g ? 1 : shade(g))
+      .style('stroke-width', focus === g ? 3 : (g === 'All' ? 2.5 : 1.75)).style('stroke-dasharray', dashOf(g)).style('stroke-linejoin', 'round')
+      .style('opacity', focus && focus !== g ? 0.15 : 1).style('pointer-events', 'none');
   });
   const tip = tipper(box, W);
   const step = hours.length > 1 ? x(hours[1]) - x(hours[0]) : W - m.l - m.r;
@@ -359,7 +378,7 @@ dash.draw('chart_occday', (el) => {
   const hov = svg.selectAll('rect.sr-hov').data(hours).join('rect').attr('class', 'sr-hov').attr('x', (h) => x(h) - step / 2).attr('y', m.t).attr('width', step).attr('height', H - m.b - m.t).style('fill', 'transparent');
   const show = (ev, h) => {
     guide.attr('x1', x(h)).attr('x2', x(h)).style('opacity', 1);
-    const lines = (focus ? [focus] : days).map((w) => { const r = (by.get(w) || []).find((q) => +q.hour === h); return r ? name(w) + ': ' + F.pct(+r.occ_pct) + ' (' + F.dec(+r.on_site) + ' on site)' : null; }).filter(Boolean);
+    const lines = (focus ? [focus, 'All'].filter((g, i, a) => a.indexOf(g) === i) : groups).map((g) => { const r = (by.get(g) || []).find((q) => +q.hour === h); return r ? name(g) + ': ' + F.pct(+r.occ_pct) + ' (' + F.dec(+r.on_site) + ' on site)' : null; }).filter(Boolean);
     tip.show([hourLabel(h) + ' to ' + hourLabel(h + 1), ...lines], x(h), m.t);
   };
   hov.on('pointermove', show).on('pointerleave', () => { guide.style('opacity', 0); tip.hide(); });

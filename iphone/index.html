@@ -36,6 +36,8 @@
 .mb-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--color-fg-muted);margin-bottom:6px}
 .mb-key{display:inline-flex;align-items:center;gap:5px}
 .mb-key i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.mb-seg{display:flex;gap:6px;flex-wrap:wrap}
+.mb-seg .mb-tab{min-height:34px;padding:6px 12px;font-size:13px}
 .mb-keybtn{border:0;background:none;padding:2px 0;font:inherit;color:inherit;cursor:pointer}
 .mb-key i.mb-dash{height:0;border-top:2px dashed var(--cds-chart-reference);border-radius:0;width:12px}
 .mb-axis text{fill:var(--cds-text-secondary);font-size:10.5px;font-family:var(--font-anthropic-sans)}
@@ -81,7 +83,7 @@
 </div>
 <div class="mb-card"><h3 class="mb-h" id="h-sales">Net sales by month</h3><p class="mb-note">Tap a bar to filter the whole page to that month.</p><div class="mb-chart" id="chart-sales" data-draw="chart_sales" data-source="monthly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-occm">Guests a day and occupancy</h3><div class="mb-chart" id="chart-occm" data-draw="chart_occm" data-source="monthly">—</div></div>
-<div class="mb-card"><h3 class="mb-h" id="h-occday">Occupancy by hour, each day <span class="mb-sub" data-draw="periodname">—</span></h3><p class="mb-note">Average share of capacity booked each hour. Tap a day in the key to pick it out.</p><div class="mb-chart" id="chart-occday" data-draw="chart_occday" data-source="hourly">—</div></div>
+<div class="mb-card"><h3 class="mb-h" id="h-occday">Occupancy by hour</h3><p class="mb-note">Average share of capacity booked each hour, with a line for each weekday, week or month. Week and Month lines get darker with time. Tap a line in the key to pick it out.</p><div class="mb-chart" id="chart-occday" data-draw="chart_occday" data-source="hourly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-wsales">Net sales by week</h3><p class="mb-note">Weeks run Monday to Sunday. Tap a bar or row to filter the page to that week.</p><div class="mb-chart" id="chart-wsales" data-draw="chart_wsales" data-source="monthly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-wocc">Guests a day and occupancy by week</h3><div class="mb-chart" id="chart-wocc" data-draw="chart_wocc" data-source="monthly">—</div></div>
 <div class="mb-card"><h3 class="mb-h" id="h-weeks">Week by week</h3><div class="mb-tw"><table class="mb-table" id="table-weekly" data-source="monthly" data-row-key="key" data-scope="weeks"><thead><tr><th class="mb-l" data-field="month" data-fmt="mon">Week of</th><th data-field="net" data-fmt="usdk">Net</th><th data-field="guests" data-fmt="int">Guests</th><th data-field="occ_pct" data-fmt="pct0">Occ.</th><th data-field="ahead_pct" data-fmt="pct0">1+ day ahead</th></tr></thead><tbody data-draw="rows"></tbody></table></div></div>
